@@ -1,7 +1,9 @@
-package com.eblocks.platform.coolweather;
+package com.eblocks.platform.coolweather.ui.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.eblocks.platform.coolweather.R;
 
 public class MainActivity extends AppCompatActivity {
 

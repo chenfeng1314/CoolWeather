@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="cool_weather" />
+    <version value="2" />
+    <list>
+        <mapping value="com.eblocks.platform.coolweather.db.Province" />
+        <mapping value="com.eblocks.platform.coolweather.db.City" />
+        <mapping value="com.eblocks.platform.coolweather.db.County" />
+    </list>
+</litepal>

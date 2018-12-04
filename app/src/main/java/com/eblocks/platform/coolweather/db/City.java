@@ -1,6 +1,7 @@
 package com.eblocks.platform.coolweather.db;
 
-import org.litepal.LitePal;
+import org.litepal.crud.LitePalSupport;
+
 
 /**
  * author : chenhongsheng
@@ -9,7 +10,7 @@ import org.litepal.LitePal;
  * desc   :
  * version: 1.0
  */
-public class City extends LitePal {
+public class City extends LitePalSupport {
 
     private int id;
     private String cityName;
