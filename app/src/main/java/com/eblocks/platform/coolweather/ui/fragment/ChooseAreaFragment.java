@@ -118,7 +118,6 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
         switch (v.getId()) {
             case R.id.back_button:
                 // TODO 18/12/04
-
                 if (currentLevel == LEVEL_COUNTY) {
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
