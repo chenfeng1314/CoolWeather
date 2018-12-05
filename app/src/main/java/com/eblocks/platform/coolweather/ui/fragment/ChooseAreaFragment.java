@@ -1,6 +1,7 @@
 package com.eblocks.platform.coolweather.ui.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import com.eblocks.platform.coolweather.R;
 import com.eblocks.platform.coolweather.db.City;
 import com.eblocks.platform.coolweather.db.County;
 import com.eblocks.platform.coolweather.db.Province;
+import com.eblocks.platform.coolweather.ui.activity.WeatherActivity;
 import com.eblocks.platform.coolweather.util.HttpUtil;
 import com.eblocks.platform.coolweather.util.Utility;
 
@@ -107,6 +109,10 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id", countyList.get(position).getWeatherId());
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
