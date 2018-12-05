@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -50,6 +51,7 @@ public class WeatherActivity extends AppCompatActivity {
     public static final String CARWASH_INFO = "洗车指数：";
     public static final String SPORT_INFO = "运动建议：";
     private ImageView mPicImageBing;
+    private static final String TAG = "WeatherActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +77,11 @@ public class WeatherActivity extends AppCompatActivity {
         } else {
             String weatherId = getIntent().getStringExtra("weather_id");
             mLayoutWeather.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
+            if (weatherId == null) {
+                requestWeather("CN101190901");
+            } else {
+                requestWeather(weatherId);
+            }
         }
     }
 
@@ -121,6 +127,7 @@ public class WeatherActivity extends AppCompatActivity {
         mTextDegree.setText(degree);
         mInfoTextWeather.setText(weatherInfo);
         mLayoutForecast.removeAllViews();
+        Log.d(TAG, "showWeatherInfo: " + weather.forecastList.size());
         for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, mLayoutForecast, false);
             mTextDate = (TextView) view.findViewById(R.id.date_text);
@@ -131,13 +138,15 @@ public class WeatherActivity extends AppCompatActivity {
             mTextInfo.setText(forecast.more.info);
             mTextMax.setText(forecast.temperature.max);
             mTextMin.setText(forecast.temperature.min);
+            mLayoutForecast.addView(view);
         }
         if (weather.aqi != null) {
-            mTextApi.setText(weather.aqi.city.api);
+            Log.d(TAG, "showWeatherInfo: " + weather.aqi.city.aqi);
+            mTextApi.setText(weather.aqi.city.aqi);
             mTextPm25.setText(weather.aqi.city.pm25);
         }
         String comfort = COMFORT_INFO + weather.suggestion.comfort.info;
-        String carWash = CARWASH_INFO + weather.suggestion.carWash;
+        String carWash = CARWASH_INFO + weather.suggestion.carWash.info;
         String sport = SPORT_INFO + weather.suggestion.sport.info;
         mTextComfort.setText(comfort);
         mWashTextCar.setText(carWash);
