@@ -5,10 +5,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -28,7 +31,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView mCityTitle;
     private TextView mUpdateTimeTitle;
@@ -45,13 +48,15 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView mTextInfo;
     private TextView mTextMax;
     private TextView mTextMin;
+    public SwipeRefreshLayout mRefreshSwipe;
+    private Button mButtonNav;
+    public DrawerLayout mLayoutDrawer;
 
     public static final String RESULT_OK = "ok";
     public static final String COMFORT_INFO = "舒适度：";
     public static final String CARWASH_INFO = "洗车指数：";
     public static final String SPORT_INFO = "运动建议：";
     private ImageView mPicImageBing;
-    private static final String TAG = "WeatherActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,8 @@ public class WeatherActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_weather);
         initView();
+        mRefreshSwipe.setColorSchemeResources(R.color.colorPrimary);
+        final String weatherId;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         String bingPic = prefs.getString("bing_pic", null);
@@ -72,10 +79,13 @@ public class WeatherActivity extends AppCompatActivity {
             loadBingPic();
         }
         if (weatherString != null) {
+            //有缓存时直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
+            weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         } else {
-            String weatherId = getIntent().getStringExtra("weather_id");
+            //无缓存时去服务器查询天气
+            weatherId = getIntent().getStringExtra("weather_id");
             mLayoutWeather.setVisibility(View.INVISIBLE);
             if (weatherId == null) {
                 requestWeather("CN101190901");
@@ -83,6 +93,12 @@ public class WeatherActivity extends AppCompatActivity {
                 requestWeather(weatherId);
             }
         }
+        mRefreshSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(weatherId);
+            }
+        });
     }
 
     /**
@@ -127,7 +143,6 @@ public class WeatherActivity extends AppCompatActivity {
         mTextDegree.setText(degree);
         mInfoTextWeather.setText(weatherInfo);
         mLayoutForecast.removeAllViews();
-        Log.d(TAG, "showWeatherInfo: " + weather.forecastList.size());
         for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, mLayoutForecast, false);
             mTextDate = (TextView) view.findViewById(R.id.date_text);
@@ -141,7 +156,6 @@ public class WeatherActivity extends AppCompatActivity {
             mLayoutForecast.addView(view);
         }
         if (weather.aqi != null) {
-            Log.d(TAG, "showWeatherInfo: " + weather.aqi.city.aqi);
             mTextApi.setText(weather.aqi.city.aqi);
             mTextPm25.setText(weather.aqi.city.pm25);
         }
@@ -159,7 +173,7 @@ public class WeatherActivity extends AppCompatActivity {
      *
      * @param weatherId
      */
-    private void requestWeather(String weatherId) {
+    public void requestWeather(String weatherId) {
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=5765d5bd5788441fbaf80b24adee77cd";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -168,6 +182,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        mRefreshSwipe.setRefreshing(false);
                     }
                 });
             }
@@ -187,6 +202,7 @@ public class WeatherActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        mRefreshSwipe.setRefreshing(false);
                     }
                 });
             }
@@ -210,5 +226,24 @@ public class WeatherActivity extends AppCompatActivity {
         mTextSport = (TextView) findViewById(R.id.sport_text);
         mLayoutWeather = (ScrollView) findViewById(R.id.weather_layout);
         mPicImageBing = (ImageView) findViewById(R.id.bing_pic_image);
+        mRefreshSwipe = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        mButtonNav = (Button) findViewById(R.id.nav_button);
+        mButtonNav.setOnClickListener(this);
+        mLayoutDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.nav_button:
+                if (mLayoutDrawer.isDrawerOpen(GravityCompat.START)) {
+                    mLayoutDrawer.closeDrawers();
+                } else {
+                    mLayoutDrawer.openDrawer(GravityCompat.START);
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -20,6 +20,7 @@ import com.eblocks.platform.coolweather.R;
 import com.eblocks.platform.coolweather.db.City;
 import com.eblocks.platform.coolweather.db.County;
 import com.eblocks.platform.coolweather.db.Province;
+import com.eblocks.platform.coolweather.ui.activity.MainActivity;
 import com.eblocks.platform.coolweather.ui.activity.WeatherActivity;
 import com.eblocks.platform.coolweather.util.HttpUtil;
 import com.eblocks.platform.coolweather.util.Utility;
@@ -109,10 +110,19 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id", countyList.get(position).getWeatherId());
-                    startActivity(intent);
-                    getActivity().finish();
+                    String weatherId = countyList.get(position).getWeatherId();
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if (getActivity() instanceof WeatherActivity) {
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.mLayoutDrawer.closeDrawers();
+                        activity.mRefreshSwipe.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
+
                 }
             }
         });
@@ -123,7 +133,6 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back_button:
-                // TODO 18/12/04
                 if (currentLevel == LEVEL_COUNTY) {
                     queryCities();
                 } else if (currentLevel == LEVEL_CITY) {
