@@ -59,6 +59,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     public static final String CARWASH_INFO = "洗车指数：";
     public static final String SPORT_INFO = "运动建议：";
     private ImageView mPicImageBing;
+    private String weatherId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +72,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_weather);
         initView();
         mRefreshSwipe.setColorSchemeResources(R.color.colorPrimary);
-        final String weatherId;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         String bingPic = prefs.getString("bing_pic", null);
@@ -182,6 +182,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
      * @param weatherId
      */
     public void requestWeather(String weatherId) {
+        this.weatherId = weatherId;
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=5765d5bd5788441fbaf80b24adee77cd";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
