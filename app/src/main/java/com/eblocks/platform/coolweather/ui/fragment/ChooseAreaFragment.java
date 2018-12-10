@@ -110,6 +110,7 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
                 } else if (currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
                     String weatherId = countyList.get(position).getWeatherId();
                     if (getActivity() instanceof MainActivity) {
                         Intent intent = new Intent(getActivity(), WeatherActivity.class);
@@ -122,7 +123,6 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
                         activity.mRefreshSwipe.setRefreshing(true);
                         activity.requestWeather(weatherId);
                     }
-
                 }
             }
         });
@@ -150,7 +150,7 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
     private void queryCounties() {
         mTextTitle.setText(selectedCity.getCityName());
         mButtonBack.setVisibility(View.VISIBLE);
-        countyList = LitePal.where("cityId = ?", String.valueOf(selectedCity.getCityCode())).find(County.class);
+        countyList = LitePal.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {
             dataList.clear();
             for (County county : countyList) {
@@ -243,19 +243,19 @@ public class ChooseAreaFragment extends Fragment implements View.OnClickListener
                     result = Utility.handleCountyResponse(responseText, selectedCity.getId());
                 }
                 if (result) {
-                    closeProgressDialog();
-                    if (PROVINCE.equalsIgnoreCase(type)) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            closeProgressDialog();
+                            if (PROVINCE.equalsIgnoreCase(type)) {
                                 queryProvinces();
+                            } else if (CITY.equalsIgnoreCase(type)) {
+                                queryCities();
+                            } else if (COUNTY.equalsIgnoreCase(type)) {
+                                queryCounties();
                             }
-                        });
-                    } else if (CITY.equalsIgnoreCase(type)) {
-                        queryCities();
-                    } else if (COUNTY.equalsIgnoreCase(type)) {
-                        queryCounties();
-                    }
+                        }
+                    });
                 }
             }
         });
